@@ -1,0 +1,7 @@
+__pycache__/
+src/app/__pycache__/
+venv/
+.env
+logs
+*.log
+

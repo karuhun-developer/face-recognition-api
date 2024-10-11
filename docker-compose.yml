@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  web:
+    build: ./src
+    command: uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 8000
+
+    volumes:
+      - ./src:/usr/app/
+    ports:
+      - "8002:8000"
+
+networks:
+  default:
+    name: face_recognition
