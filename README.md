@@ -53,3 +53,10 @@
    `docker-compose up -d --build`
 
 4. App run on port 8002.
+
+## If Face Recognition model error
+
+```bash
+pip install wheel setuptools pip --upgrade
+pip install git+https://github.com/ageitgey/face_recognition_models --verbose
+```
