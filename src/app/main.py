@@ -1,13 +1,15 @@
 import mysql.connector
-from fastapi import FastAPI, HTTPException, File, UploadFile
+from fastapi import FastAPI, HTTPException, File, UploadFile, Form
 from starlette.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 import face_recognition
 import urllib.request
 import numpy as np
 import cv2
 import os
 from dotenv import load_dotenv
+from turfpy.measurement import boolean_point_in_polygon
+from geojson import Point, Polygon, Feature
+
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -24,14 +26,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Add request model
-class Request(BaseModel):
-    user_id: str
-    image: str
-
 @app.post("/recognize")
-async def recognize(image: UploadFile = File(...)):
-    # request: Request,
+async def recognize(lat: str = Form(...), lon: str = Form(...), image: UploadFile = File(...)):
     try:
         # Connect to database
         db = mysql.connector.connect(
@@ -49,6 +45,28 @@ async def recognize(image: UploadFile = File(...)):
         cursor = db.cursor()
         cursor.execute("SELECT * FROM users")
         results = cursor.fetchall()
+
+        # Get polygon locations from database
+        cursor.execute("SELECT * FROM locations")
+        locations = cursor.fetchall()
+
+        polygons = []
+
+        # Loop through locations
+        for location in locations:
+            # 0 id
+            # 1 lat
+            # 2 lon
+
+            # Get polygon coordinates
+            polygons.append(((float(location[1]), float(location[2]))))
+
+        # Check if lat and lon are in any polygon
+        point = Feature(geometry=Point((float(lon), float(lat))))
+        polygon = Polygon([polygons])
+
+        if(boolean_point_in_polygon(point, polygon) == False):
+            raise HTTPException(status_code=403, detail='Location not allowed')
 
         # Load input image
         # request_image = urllib.request.urlopen(request.image)

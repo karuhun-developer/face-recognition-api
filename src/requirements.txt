@@ -9,3 +9,7 @@ pillow
 mysql-connector
 python-dotenv
 python-multipart
+
+# For Geolocation
+turfpy
+geojson
